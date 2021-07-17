@@ -142,14 +142,14 @@ x = 100; 👉 할당문은 그 자체 표현식이지만 완전한 문이기도 
 
 예 >
 <pre>
-var template = `<ul>\n\t<li><a href = "#">Home</a></li>\n<ul>`;
+var template = `&lt;ul&gt;\n\t&lt;li&gt;&lt;a href = "#"&gt;Home&lt;/a&gt;&lt;/li&gt;\n&lt;ul&gt;`;
 </pre>
 
 👇 출력 결과
 <pre>
-<ul>
-<li><a href = "#">Home</a></li>
-</ul>
+&lt;ul&gt;
+&lt;li&gt;&lt;a href = "#"&gt;Home&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 </pre>
 
 #### 6.3.2 표현식 삽입
