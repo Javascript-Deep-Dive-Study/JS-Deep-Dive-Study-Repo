@@ -736,7 +736,7 @@ person.fullName = "Heegun Lee";
 console.log(person); // { firstName: "Heegun", lastName: "Lee" }
 ```
 
-### 객체 확장 금지
+#### 객체 확장 금지
 
 Object.preventExtensions 메서드는 객체의 확장을 금지한다.
 
@@ -765,7 +765,7 @@ Object.defineProperty(person, 'age', { value: 20 });
 // TypeError: Cannot define property age, object is not extensible
 ```
 
-### 16.5.2 객체 밀봉
+#### 객체 밀봉
 
 Object.seal 메서드는 객체를 밀봉한다. 밀봉된 객체는 읽기와 쓰기만 가능하다.
 
@@ -808,7 +808,7 @@ Object.defineProperty(person, 'name', { configurable: true });
 // TypeError: Cannot redefine property: name
 ```
 
-### 객체 동결
+#### 객체 동결
 
 Object.freeze 메서드는 객체를 동결한다. 동결된 객체는 읽기만 가능하다.
 
@@ -849,11 +849,11 @@ Object.defineProperty(person, 'name', { configurable: true });
 // TypeError: Cannot redefine property: name
 ```
 
-# 17장 생성자 함수에 의한 객체 생성
+## 17장 생성자 함수에 의한 객체 생성
 
 #### **생성자 함수**
 
-### constructor와 non-constructor의 구분
+#### constructor와 non-constructor의 구분
 
 - constructor: 함수 선언문, 함수 표현식, 클래스(클래스도 함수다)
 - non-constructor: 메서드(ES6 메소드 축약 표현), 화살표 함수
@@ -909,9 +909,9 @@ const circle = Circle(5);
 console.log(circle.getDiameter());
 ```
 
-# 18장 함수와 일급 객체
+## 18장 함수와 일급 객체
 
-## 일급 객체
+#### 일급 객체
 
 다음과 같은 조건을 만족하는 객체를 일급 객체라 한다.
 
@@ -920,9 +920,9 @@ console.log(circle.getDiameter());
 3. 함수의 매개변수에 전달할 수 있다.
 4. 함수의 반환값으로 사용할 수 있다.
 
-## 함수 객체의 프로퍼티
+#### 함수 객체의 프로퍼티
 
-### arguments 프로퍼티
+#### arguments 프로퍼티
 
 arguments 객체는 **함수 호출 시 전달된 인수argument 들의 정보를 담고 있는 순회 가능한iterable 유사 배열 객체**이며, **함수 내부에서 지역 변수처럼 사용**된다.
 
@@ -969,7 +969,7 @@ console.log(sum(1, 2));             // 3
 console.log(sum(1, 2, 3, 4, 5));    // 15
 ```
 
-### length 프로퍼티
+#### length 프로퍼티
 
 함수 객체의 length 프로퍼티는 함수를 정의할 때 선언한 매개변수의 개수를 가리킨다.
 
@@ -988,7 +988,7 @@ function baz(x, y) {
 console.log(baz.length);    // 2
 ```
 
-### name 프로퍼티
+#### name 프로퍼티
 
 함수 객체의 name 프로퍼티는 함수 이름을 나타낸다.
 
