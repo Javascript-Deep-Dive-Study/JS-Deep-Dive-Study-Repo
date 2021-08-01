@@ -421,3 +421,53 @@ console.log(foo); // 123
 var foo;
 ```
 
+#### let 키워드
+
+Var 키워드의 단점을 보완하기 위해 ES6에서 새로운 변수 선언 키워드인 let과 const를 도입했다.
+
+```javascript
+# 변수 중복 선언 금지
+var foo = 123;
+// var 키워드로 선언된 변수는 같은 스코프 내에서 중복 선언을 허용한다.
+// 아래 변수 선언문은 자바스크립트 엔진에 의해 var 키워드가 없는 것처럼 동작한다.
+var foo = 456;
+
+let bar = 123;
+// let이나 const 키워드로 선언된 변수는 같은 스코프 내에서 중복 선언을 허용하지 않는다.
+let bar = 456; // SyntaxError: Identifier 'bar' has already been declared
+```
+
+```javascript
+# 블록 레벨 스코프
+// var 키워드로 선언한 변수는 오로지 함수의 코드 블록만을 지역 스코프로 인정하는 함수 레벨 스코프를 따른다. 하지만 let 키워드로 선언한 변수는 모든 코드 블록(함수, if 문, for 문, while 문, try/catch 문 등)을 지역 스코프로 인정하는 블록 레벨 스코프(block-level-scope)를 따른다.
+
+let foo = 1; // 전역 변수
+
+{
+  let foo = 2; // 지역 변수
+  let bar = 3; // 지역 변수
+}
+
+console.log(foo); // 1
+console.log(bar); // ReferenceError: bar is not defined
+```
+
+```javascript
+let i = 10; 											// 전역 스코프
+
+function foo() {                   // 함수 레벨
+  let i = 100; 										 // 스코프
+  
+  for (let i = 1; i < 3; i++) {    //  블록
+    console.log(i); // 1 2         //  레벨
+  }   														 //  스코프
+  
+  console.log(i); // 100					 // 함수 레벨
+}																	 // 스코프
+foo();														 // 전역 스코프
+
+console.log(i); // 10							 // 전역 스코프
+```
+
+
+
