@@ -70,10 +70,10 @@ console.log(x); // ???
 > ```javascript
 > function foo() {
 > 	var x = 1;
->   // var 키워드로 선언된 변수는 같은 스코프 내에서 중복 선언을 허용한다.
->   // 아래 변수 선언문은 자바스크립트 엔진에 의해 var 키워드가 없는 것처럼 동작한다.
->   var x =2;
->   console.log(x); // 2
+> // var 키워드로 선언된 변수는 같은 스코프 내에서 중복 선언을 허용한다.
+> // 아래 변수 선언문은 자바스크립트 엔진에 의해 var 키워드가 없는 것처럼 동작한다.
+> var x =2;
+> console.log(x); // 2
 > }
 > foo();
 > ```
@@ -365,19 +365,19 @@ console.log(x);
 ####  **var 키워드로 선언한 변수의 문제점**
 
  ```javascript
- # 변수 중복 선언 허용
- var x = 1;
- var y = 1;
- // var 키워드로 선언된 변수는 같은 스코프 내에서 중복 선언을 허용한다.
- // 초기화문의 있는 변수 선어문은 자바스크립트 엔진에 의해 var 키워드가 없는 것처럼 동작한다.
- var x = 100;
- // 초기화문이 없는 변수 선언문은 무시된다.
- var y;
- 
- console.log(x); // 100
- console.log(y); // 1
- 
- // 위 예제의 var 키워드로 선언한 x 변수와 y 변수는 중복 선언되었다. 이처럼 var 키워드로 선언한 변수를 중복 선언하면 초기화문(변수 선언과 동시에 초기값을 할당하는 문) 유무에 따라 다르게 동작한다. 초기화문이 있는 변수 선언문은 자바스크립트 엔진에 의해 var 키워드가 없는 것처럼 동작하고 초기화문이 없는 벼수 선언문은 무시된다. 그리고....에러는 발생하지 않는다.
+# 변수 중복 선언 허용
+var x = 1;
+var y = 1;
+// var 키워드로 선언된 변수는 같은 스코프 내에서 중복 선언을 허용한다.
+// 초기화문의 있는 변수 선어문은 자바스크립트 엔진에 의해 var 키워드가 없는 것처럼 동작한다.
+var x = 100;
+// 초기화문이 없는 변수 선언문은 무시된다.
+var y;
+
+console.log(x); // 100
+console.log(y); // 1
+
+// 위 예제의 var 키워드로 선언한 x 변수와 y 변수는 중복 선언되었다. 이처럼 var 키워드로 선언한 변수를 중복 선언하면 초기화문(변수 선언과 동시에 초기값을 할당하는 문) 유무에 따라 다르게 동작한다. 초기화문이 있는 변수 선언문은 자바스크립트 엔진에 의해 var 키워드가 없는 것처럼 동작하고 초기화문이 없는 벼수 선언문은 무시된다. 그리고....에러는 발생하지 않는다.
  ```
 
 ```javascript
@@ -453,7 +453,7 @@ console.log(bar); // ReferenceError: bar is not defined
 ```
 
 ```javascript
-let i = 10; 											// 전역 스코프
+let i = 10; 										   // 전역 스코프
 
 function foo() {                   // 함수 레벨
   let i = 100; 										 // 스코프
@@ -469,5 +469,542 @@ foo();														 // 전역 스코프
 console.log(i); // 10							 // 전역 스코프
 ```
 
+```javascript
+# 변수 호이스팅 Var
+console.log(foo); // ReferenceError: foo is not defined
+let foo;
 
+// var 키워드로 선언한 변수는 런타임 이전에 선언 단계와 초기화 단계가 실행된다.
+// 따라서 변수 선언문 이전에 변수를 참조할 수 있다.
+console.log(foo); // undefined
+
+var foo;
+console.log(foo); // undefined
+
+foo = 1; // 할당문에서 할당 단계가 실행된다.
+console.log(foo); // 1
+
+# 변수 호이스팅 Let
+// 런타임 이전에 선언 단계가 실행된다. 아직 변수가 초기화되지 않았다.
+// 초기화 이전의 일시적 사각지대에서는 변수를 참조할 수 없다.
+console.log(foo); // ReferenceError: foo is not defined
+
+let foo; // 변수 선언문에서 초기화 단계가 실행된다.
+console.log(foo); // undefined
+
+foo = 1; // 할당문에서 할당 단계가 실행된다.
+console.log(foo); // 1
+```
+
+> #### ❗결론
+>
+> 자바스크립트는 ES6에서 도입된 let, const를 포함해서 모든 선언(var, let, const, function, function*, class 등)을 호이스팅한다. 단, ES6에서 도입된 let, const, class를 사용한 선언문은 호이스팅이 발생하지 않는 것처럼 동작한다.
+
+```javascript
+# const 키워드
+// const 키워드로 선언한 변수는 반드시 선언과 동시에 초기화해야 한다.
+const foo = 1;
+
+const foo; // SyntaxError: Missing initializer in const declaration
+
+{
+  // 변수 호이스팅이 발생하지 않는 것처럼 동작한다.
+  console.log(foo); // ReferenceError: Cannot access 'foo' before initialization
+  const foo = 1;
+  console.log(foo); // 1
+}
+
+// 블록 레벨 스코프를 갖는다.
+console.log(foo); // ReferenceError: foo is not defined
+
+// 재할당 금지
+const foo = 1;
+foo = 2; // TypeError: Assignment to constant variable.
+
+// const 키워드로 선언한 변수에 원시 값을 할당한 경우 변수 값을 변경할 수 없다. 원시 값은 변경 불가능한 값(immutable value)이므로 재할당 없이 값을 변경할 수 있는 방법이 없기 때문이다. 
+```
+
+```javascript
+# const 키워드와 객체
+// const 키워드로 선언된 변수에 객체를 할당한 경우 값을 변경할 수 있다. 변경 불가능한 값인 원시 값은 재할당 없이 변경(교체)할 수 있는 방법이 없지만 변경 가능한 값인 객체는 재할당 없이도 직접 변경이 가능하기 때문이다.
+
+const person = {
+  name: 'Lee',
+};
+
+// 객체는 변경 가능한 값이다. 따라서 재할다 없이 변경이 가능하다.
+
+person.name = 'Kim';
+
+console.log(person); // {name: "Kim"}
+
+
+❗const 키워드는 재할당을 금지할 뿐 "불변"을 의미하지 않는다. 다시 말해, 새로운 값을 재할당하는 것은 불가능하지만 프로퍼티 동적 생성, 삭제, 프로퍼티 값의 변경을 통해 객체를 변경하는 것은 가능하다. 이때 객체가 변경되더라도 변수에 할당된 참조 값은 변겨되지 않는다.
+```
+
+> #### 정리
+>
+> **var vs. let vs. const**
+>
+> 변수 선언에는 기본적으로 const를 사용하고 let은 재할당이 필요한 경우에 한정해 사용하는 것이 좋다. const 키워드를 사용하면 의도치 않은 재할당을 방지하기 때문에 좀 더 안전하다.
+>
+> Var와 let, const 키워드는 다음과 같이 사용하는 것을 권장한다.
+>
+> * ES6를 사용한다면 var 키워드는 사용하지 않는다.
+> * 재할당이 필요한 경우에 한정해 let 키워드를 사용한다. 이때 변수의 스코프는 최대한 좁게 만든다.
+> * 변경이 발생하지 않고 읽기 전용으로 사용하는(재할당이 필요 없는 상수) 원시 값과 객체에는 const 키워드를 사용한다. const 키워드는 재할당을 금지하므로 var, let 키워드보다 안전하다.
+>
+> ❗ 변수를 선언하는 시점ㅇ는 재할당이 필요할지 잘 모르는 경우가 많다. 그리고 객체는 의외로 재할당하는 경우가 드물다. 
+>
+> 따라서 변수를 선어할 때는 일단 const 키워드를 사용하자. 반드시 재할당이 필요하다면(반드시 재할당이 필요한지 한번 생각해 볼 일이다) 그때 const 키워드를 let 키워드로 변경해도 결코 늦지 않다.
+
+​		
+
+## 16장 프로퍼티 어트리뷰트
+
+이 장의 주제인 프로퍼티 어트리뷰트를 이해하기 위해 먼저 내부 슬롯(internal slot)과 내부 메서드(internal method)의 개념에 대해 알아본다.
+
+내부 슬롯과 내부 메서드는 자바스크립트 엔진의 구현 알고리즘을 설명하기 위해 ECMAScript사양에서 사용하는 의사 프로퍼티(pseudo property)와 의사 메서드(pseudo method)이다. 바로 ECMAScript 사양에 등장하는 이중 대괄호([[...]])로 감싼 이름들이 내부 슬롯과 내부 메서드이다.
+
+내부 슬롯과 내부 메서드는  ECMAScript 사양에 저의된 대로 구현되어 자바스크립트 엔진에서 실제로 동작 하지만 개발자가 직접 접근할 수 있도록 외부로 공개된 객체의 포로퍼티는 아니다. 즉, 내부 슬롯과 내부 메서드는 자바스크립트 엔진의 내부 로직이므로 원칙적으로 자바스크립트는 내부 슬롯과 내부 메서드에 직접적으로 접근하거나 호출할 수 있는 방법을 제공하지 않는다. 단, 일부 내부 슬롯과 내부 메서드에 한하여 간적적으로 접근할 수 있는 수단을 제공하기는 한다.
+
+예를 들어, 모든 객체는 [[Prototype]]이라는 내부 슬롯을 갖는다. 내부 슬롯은 자바스크립트 엔진의 내부로직이므로 원칙적으로 직접 접근할 수 없지만 [[Prototype]] 내부 슬롯의 경우, \__proto__를 통해 간접적으로 접근할 수 있다.
+
+```javascript
+const o = {};
+// 내부 슬롯은 자바스크립트 엔진의 내부 로직이므로 직접 접근할 수 없다.
+o.[[Prototype]] // -> Uncaught SyntaxError: Unexpected token '['
+// 단, 일부 내부 슬롯과 내부 메서드에 한하여 간접적으로 접근할 수 있는 수단을 제공하기는 한다.
+o.__proto__ // -> Object.prototype
+```
+
+#### 프로퍼티 어트리뷰트와 프로퍼티 디스크립터 객체
+
+property attribute 확인
+
+- Object.getOwnPropertyDescriptor
+- Object.getOwnPropertyDescriptors
+
+```javascript
+const person = {
+    name: 'Lee'
+};
+
+// 프로퍼티 어트리뷰트 정보를 제공하는 프로퍼티 디스크립터 객체를 반환한다
+console.log(Object.getOwnPropertyDescriptor(person, 'name'));
+// { value: "Lee", writable: true, enumerable: true, configurable: true }
+```
+
+```javascript
+const person = {
+    name: 'Lee'
+};
+
+// 프로퍼티 동적 생성
+person.age = 20;
+
+// 모든 프로퍼티 어트리뷰트 정보를 제공하는 프로퍼티 디스크립터 객체들을 반환한다
+console.log(Object.getOwnPropertyDescriptor(person));
+/*
+{
+    name: { value: "Lee", writable: true, enumerable: true, configurable: true },
+    age: { value: 20, writable: true, enumerable: true, configurable: true },
+}
+*/
+```
+
+#### 접근자 프로퍼티
+
+객체의 getter, setter 메소드
+get, set, enumerable, configurable을 가짐
+
+```javascript
+const person = {
+    // 데이터 프로퍼티
+    firstName: 'Jongfeel',
+    lastName: 'Kim',
+
+    // fullName은 접근자 함수로 구성된 접근자 프로터티다.
+    // getter 함수
+    get fullName() {
+        return `${this.firstName} ${this.lastName}`
+    },
+    // setter 함수
+    set fullName(name) {
+        // 배열 디스트럭처링 할당: "31.1 배열 디스트럭처링 할당" 참고
+        [this.firstName, this.lastName] = name.split(' ');
+    }
+};
+
+// 데이터 프로퍼티를 통한 프로터티 값의 참조
+console.log(person.firstName + ' ' + person.lastName); // Jongfeel Kim
+
+// 접근자 프로퍼티를 통한 프로퍼티 값의 저장
+// 접근자 프로퍼티 fullName에 값을 저장하면 setter 함수가 호출된다.
+person.fullName = 'Heegun Lee';
+console.log(person); // { firstName: "Heegun", lastName: "Lee" }
+
+// 접근자 프로터티를 통한 프로터티 값의 참조
+// 접근자 프로터티 fullName에 접근하면 getter 함수가 호출된다.
+console.log(person.fullName); // Heegun Lee
+
+// firstName은 데이터 프로퍼티다.
+// 데이터 프로퍼티는 [[Value]], [[Writable]], [[Enumerable]], [[Configurable]]
+// 프로터티 어트리뷰트를 갖는다.
+let descriptor = Object.getOwnPropertyDescriptor(person, 'firstName');
+console.log(descriptor);
+// { value: "Heegun", writable: true, enumerable: true, configurable: true }
+
+// fullName은 접근자 프로퍼티다.
+// 접근자 프로터티는 [[Get]], [[Set]], [[Enumerable]], [[Configurable]]
+// 프로터티 어트리뷰트를 갖는다.
+descriptor = Object.getOwnPropertyDescriptor(person, 'fullName');
+console.log(descriptor);
+// { get: f, set: F, enumerable: true, configurable: true }
+```
+
+#### 프로퍼티 정의
+
+Object.defineProperty
+
+```javascript
+const person = {};
+
+// 데이터 프로퍼티 정의
+Object.defineProperty(person, 'firstName', {
+    value: 'Ungmo',
+    writable: true,
+    enumerable: true,
+    configurable: true
+});
+
+Object.defineProperty(person, 'lastName', {
+    value: 'Lee' 
+});
+
+let descriptor = Object.getOwnPropertyDescriptor(person, 'firstName');
+console.log('firstName', descriptor);
+// firstName { value: "Ungmo", writable: true, enumerable: true, configurable: true }
+
+// 디스크립터 객체의 프로퍼티를 누락시키면 undefined, false가 기본값이다.
+descriptor = Object.getOwnPropertyDescriptor(person, 'lastName');
+console.log('lastName', descriptor);
+// lastName { value: "Lee", writable: false, enumerable: false, configurable: false }
+
+// [[Enumerable]]의 값이 false인 경우
+// 해당 프로퍼티는 for...in 문이나 Object.keys 등으로 열거할 수 없다.
+// lastName 프로퍼티는 [[Enumerable]]의 값이 false이므로 열거되지 않는다.
+console.log(Object.keys(person));   // ["firstName"]
+
+// [[Writable]]의 값이 false인 경우 해당 프로퍼티의 [[Value]]의 값을 변경할 수 없다.
+// lastName 프로퍼티는 [[Writable]]의 값이 false이므로 값을 변경할 수 없다.
+// 이때 값을 변경하면 에러는 발생하지 않고 무시된다.
+person.lastName = "Kim";
+
+// [[Configurable]]의 값이 false인 경우 해당 프로퍼티를 삭제할 수 없다.
+// lastName 프로퍼티는 [[Configurable]]의 값이 false이므로 삭제할 수 없다.
+// 이때 프로퍼티를 삭제하면 에러는 발생하지 않고 무시된다.
+delete person.lastName;
+
+// [[Configurable]]의 값이 false인 경우 해당 프로퍼티를 재정의할 수 없다.
+// Object.defineProperty(person, 'lastName', { enumerable: true });
+// Uncaught TypeError: Cannot redefine property: lastName
+
+descriptor = Object.getOwnPropertyDescriptor(person, 'lastName');
+console.log('lastName', descriptor);
+// lastName { value: "Lee", writable: false, enumerable: false, configurable: false }
+
+// 접근자 프로퍼티 정의
+Object.definePropety(person, 'fullName', {
+    // getter 함수
+    get() {
+        return `${this.firstName} ${this.lastName}`;
+    },
+    // setter 함수
+    set(name) {
+        [this.firstName, this.lastName] = name.split(' ');
+    },
+    enumerable: true,
+    configurable: true
+});
+
+descriptor = Object.getOwnPropertyDescriptor(person, 'fullName');
+console.log('fullName', descriptor);
+// fullName { get: f, set: f, enumerable: true, configurable: true }
+
+person.fullName = "Heegun Lee";
+console.log(person); // { firstName: "Heegun", lastName: "Lee" }
+```
+
+### 객체 확장 금지
+
+Object.preventExtensions 메서드는 객체의 확장을 금지한다.
+
+```javascript
+const person = { name: 'Lee' };
+
+// person 객체는 확장이 금지된 객체가 아니다.
+console.log(Object.isExtensible(person)); // true
+
+// person 객체의 확장을 금지하여 프로퍼티 추가를 금지한다.
+Object.preventExtensions(person);
+
+// person 객체는 확장이 금지된 객체다.
+console.log(Object.isExtensible(person)); // false
+
+// 프로퍼티 추가가 금지된다.
+person.age = 20; // 무시. strict mode에서는 에러
+console.log(person); // { name: "Lee" }
+
+// 프로퍼티 추가는 금지되지만 삭제는 가능하다.
+delete person.name;
+console.log(person); // {}
+
+// 프로퍼티 정의에 의한 프로퍼티 추가도 금지된다.
+Object.defineProperty(person, 'age', { value: 20 });
+// TypeError: Cannot define property age, object is not extensible
+```
+
+### 16.5.2 객체 밀봉
+
+Object.seal 메서드는 객체를 밀봉한다. 밀봉된 객체는 읽기와 쓰기만 가능하다.
+
+[예제 16-11]
+
+```javascript
+const person = { name: 'Lee' };
+
+// person 객체는 밀봉(seal)된 객체가 아니다.
+console.log(Object.isSealed(person)); // false
+
+// person 객체를 밀봉(seal)하여 프로퍼티 추가, 삭제, 재정의를  금지한다.
+Object.seal(person);
+
+// person 객체는 밀봉(seal)된 객체다.
+console.log(Object.isSealed(person)); // true
+
+// 밀봉(seal)된 객체는 configurable이 false다.
+console.log(Object.getOwnPropertyDescriptors(person));
+/*
+{
+    name: { value: "Lee", writable: true, enumerable: true, configurable: false }
+}
+*/
+
+// 프로퍼티 추가가 금지된다.
+person.age = 20; // 무시. strict mode에서는 에러
+console.log(person); // { name: "Lee" }
+
+// 프로퍼티 삭제가 금지된다.
+delete person.name; // 무시. strict mode에서는 에러
+console.log(person); // { name: "Lee" }
+
+// 프로퍼티 값 갱신은 가능하다.
+person.name = 'Kim';
+console.log(person); // { name: "Kim" }
+
+// 프로퍼티 어트리뷰트 재정의가 금지된다.
+Object.defineProperty(person, 'name', { configurable: true });
+// TypeError: Cannot redefine property: name
+```
+
+### 객체 동결
+
+Object.freeze 메서드는 객체를 동결한다. 동결된 객체는 읽기만 가능하다.
+
+```javascript
+const person = { name: 'Lee' };
+
+// person 객체는 동결(freeze)된 객체가 아니다.
+console.log(Object.isFrozen(person)); // false
+
+// person 객체를 동결(freeze)하여 프로퍼티 추가, 삭제, 재정의, 쓰기를  금지한다.
+Object.freeze(person);
+
+// person 객체는 동결(freeze))된 객체다.
+console.log(Object.isFrozen(person)); // true
+
+// 동결(freeze)된 객체는 writable과 configurable이 false다.
+console.log(Object.getOwnPropertyDescriptors(person));
+/*
+{
+    name: { value: "Lee", writable: false, enumerable: true, configurable: false }
+}
+*/
+
+// 프로퍼티 추가가 금지된다.
+person.age = 20; // 무시. strict mode에서는 에러
+console.log(person); // { name: "Lee" }
+
+// 프로퍼티 삭제가 금지된다.
+delete person.name; // 무시. strict mode에서는 에러
+console.log(person); // { name: "Lee" }
+
+// 프로퍼티 값 갱신이 금지된다.
+person.name = 'Kim'; // 무시. strict mode에서는 에러
+console.log(person); // { name: "Lee" }
+
+// 프로퍼티 어트리뷰트 재정의가 금지된다.
+Object.defineProperty(person, 'name', { configurable: true });
+// TypeError: Cannot redefine property: name
+```
+
+# 17장 생성자 함수에 의한 객체 생성
+
+#### **생성자 함수**
+
+### constructor와 non-constructor의 구분
+
+- constructor: 함수 선언문, 함수 표현식, 클래스(클래스도 함수다)
+- non-constructor: 메서드(ES6 메소드 축약 표현), 화살표 함수
+
+```javascript
+// 일반 함수 정의: 함수 선언문, 함수 표현식
+function foo() {}
+const bar = function () {};
+// 프로퍼티 x의 값으로 할당된 것은 일반 함수로 정의된 함수다. 이는 메서드로 인정하지 않는다.
+const baz = {
+    x: function () {}
+};
+
+// 일반 함수로 정의된 함수만이 constructor다.
+new foo(); // -> foo {}
+new bar(); // -> bar {}
+new baz.x(); // -> x {}
+
+// 화살표 함수 정의
+const arrow = () => {};
+
+new arrow(); // TypeError: arrow is not a constructor
+
+// 메서드 정의: ES6의 메서드 축약 표현만 메서드로 인정한다.
+const obj = {
+    x() {}
+};
+
+new obj.x(); // TypeError: obj.x is not a constructor
+```
+
+### new.target
+
+함수 내부에서 new.target을 사용하여 new 연산자와 생성자 함수로서 호출했는지 확인
+
+```javascript
+// 생성자 함수
+function Circle(radius) {
+    // 이 함수가 new 연산자와 함께 호출되지 않았다면 new.target은 undefined다.
+    if (!new.target) {
+        // new 연산자와 함께 생성자 함수를 재귀 호출하여 생성된 인스턴스를 반환한다.
+        return new Circle(radius);
+    }
+
+    this.radius = radius;
+    this.getDiameter = function () {
+        return 2 * this.radius;
+    };
+}
+
+// new 연산자 없이 생성자 함수를 호출하여도 new.target을 통해 생성자 함수로서 호출된다.
+const circle = Circle(5);
+console.log(circle.getDiameter());
+```
+
+# 18장 함수와 일급 객체
+
+## 일급 객체
+
+다음과 같은 조건을 만족하는 객체를 일급 객체라 한다.
+
+1. 무명의 리터럴로 생성할 수있다. 즉, 런타임에 생성이 가능하다.
+2. 변수나 자료구조(객체, 배열 등)에 저장할 수 있다.
+3. 함수의 매개변수에 전달할 수 있다.
+4. 함수의 반환값으로 사용할 수 있다.
+
+## 함수 객체의 프로퍼티
+
+### arguments 프로퍼티
+
+arguments 객체는 **함수 호출 시 전달된 인수argument 들의 정보를 담고 있는 순회 가능한iterable 유사 배열 객체**이며, **함수 내부에서 지역 변수처럼 사용**된다.
+
+```javascript
+function multiply(x y) {
+    console.log(arguments);
+    return x * y;
+}
+
+console.log(multiply());            // NaN
+console.log(multiply(1));           // NaN
+console.log(multiply(1, 2));        // 2
+console.log(multiply(1, 2, 3));     // 2
+```
+
+arguments 객체는 매개변수 개수를 확정할 수 없는 가변 인자 함수를 구현할 때 유용하다.
+
+```javascript
+function sum() {
+    let res = 0;
+
+    // arguments 객체는 length 프로퍼티가 있는 유사 배열 객체이므로 for 문으로 순회할 수 있다.
+    for (let i = 0; i < arguments.length; i++) {
+        res += arguments[i];
+    }
+
+    return res;
+}
+
+console.log(sum());         // 0
+console.log(sum(1, 2));     // 3
+console.log(sum(1, 2, 3));  // 6
+```
+
+ES6의 Rest 파라미터 사용
+
+```javascript
+// ES6 Rest parameter
+function sum(...args) {
+    return args.reduce((pre, cur) => pre + cur, 0);
+}
+
+console.log(sum(1, 2));             // 3
+console.log(sum(1, 2, 3, 4, 5));    // 15
+```
+
+### length 프로퍼티
+
+함수 객체의 length 프로퍼티는 함수를 정의할 때 선언한 매개변수의 개수를 가리킨다.
+
+```javascript
+function foo() {}
+console.log(foo.length);    // 0
+
+function bar(x) {
+    return x;
+}
+console.log(bar.length);    // 1
+
+function baz(x, y) {
+    return x * y;
+}
+console.log(baz.length);    // 2
+```
+
+### name 프로퍼티
+
+함수 객체의 name 프로퍼티는 함수 이름을 나타낸다.
+
+```javascript
+// 기명 함수 표현식
+var namedFunc = function foo() {};
+console.log(namedFunc.name); // foo
+
+// 익명 함수 표현식
+var anonymousFunc = function() {};
+// ES5: name 프로퍼티는 빈 문자열을 값으로 갖는다.
+// ES6: name 프로퍼티는 함수 객체를 가리키는 변수 이름을 값으로 갖는다.
+console.log(anonymousFunc.name); // anonymousFunc
+
+// 함수 선언문(Function declaration)
+function bar() {}
+console.log(bar.name); // bar
+```
 
