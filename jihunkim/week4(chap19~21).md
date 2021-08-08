@@ -882,6 +882,8 @@ address Seoul
 */
 ```
 
+<br>
+
 # 20장: strict mode
 
 <br>
@@ -1102,6 +1104,8 @@ foo();
   console.log(arguments);	// { 0: 1, length: 1 }
 }(1));
 ```
+
+<br>
 
 # 21장: 빌트인 객체
 
