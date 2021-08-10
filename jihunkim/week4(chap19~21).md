@@ -884,7 +884,7 @@ address Seoul
 
 <br>
 
-# 20장: strict mode
+# 20장 strict mode
 
 <br>
 
@@ -1107,7 +1107,7 @@ foo();
 
 <br>
 
-# 21장: 빌트인 객체
+# 21장 빌트인 객체
 
 <br>
 
