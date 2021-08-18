@@ -1257,3 +1257,585 @@ console.log(myArray);		// MyArray(4) [1, 1, 2, 3]
 console.log(myArray.uniq());	// MyArray(3) [1, 2, 3]
 console.log(myArray.average());	// 1.75
 ```
+
+# 26장. ES6 함수의 추가 기능
+
+<br>
+
+## 01. 함수의 구분
+
+- ES6 이전의 함수는 동일한 함수라도 다양한 형태로 호출할 수 있음
+  - 일반 함수로서 호출할 수 있는 것은 물론 생성자 함수로서 호출 가능 => `callable`이면서 `configurable`
+
+```js
+var foo = function() {
+  return 1;
+};
+
+// 일반적인 함수로서 호출
+foo();	// 1
+
+// 생성자 함수로서 호출
+new foo();	// foo {}
+
+// 메서드로서 호출
+var obj = { foo: foo };
+obj.foo();	// 1
+
+var bar = function() {};
+
+bar();	// undefined
+new bar();	// bar {}
+```
+
+- 객체에 바인딩된 함수나 콜백 함수도 일반 함수로서 호출할 수 있는 것은 물론 생성자 함수로서 호출할 수 있음
+  - `constructor`이면 `prototype` 프로퍼티를 가지며, 프로토타입 객체도 생성하는 것이기 때문에 성능 면에서도 문제
+
+- 이러한 문제를 해결하기 위해 ES6에서는 함수를 사용 목적에 따라 세 가지 종류로 구분
+
+| ES6 함수의 구분    | `constructor` | `prototype` | `super` | `arguments` |
+| ------------------ | ------------- | ----------- | ------- | ----------- |
+| 일반 함수(Normal)  | O             | O           | X       | O           |
+| 메서드(Method)     | X             | X           | O       | O           |
+| 화살표 함수(Arrow) | X             | X           | X       | X           |
+
+<br>
+
+## 02. 메서드
+
+- ES6 사양에서 메서드는 메서드 축약 표현으로 정의된 함수를 뜻함
+
+- ES6 메서드는 인스턴스를 생성할 수 없는 non-constructor
+  - 생성자 함수로서 호출할 수 없음
+  - 인스턴스를 생성할 수 없으므로 `prototype` 프로퍼티가 없고 프로토타입도 생성하지 않음
+  - 표준 빌트인 객체가 제공하는 프로토타입 메서드와 정적 메서드는 모두 non-constructor
+
+```js
+const obj = {
+  x: 1,
+  // foo는 메서드
+  foo() {
+    return this.x;
+  },
+  // bar는 일반 함수
+  bar: function() {
+    return this.x;
+  }
+};
+
+console.log(obj.foo());	// 1
+console.log(obj.bar());	// 1
+
+new obj.foo();	// TypeError: obj.foo is not a constructor
+new obj.bar();	// bar {}
+
+obj.foo.hasOwnProperty('prototype');	// false
+obj.bar.hasOwnProperty('prototype');	// true
+```
+
+- ES6 메서드는 자신을 바인딩한 객체를 가리키는 내부 슬롯 `[[HomeObject]]`를 가짐
+  - `super` 참조는 내부 슬롯 `[[HomeObject]]`를 사용하여 수퍼클래스의 메서드를 참조하므로 ES6 메서드는 `super` 키워드 사용 가능
+  - ES6 메서드가 아닌 함수는 내부 슬롯 `[[HomeObject]]`를 가지지 않기 때문에 `super` 키워드를 사용할 수 없음
+
+```js
+const base = {
+  name: 'Lee',
+  sayHi() {
+    return `Hi! ${this.name}`;
+  }
+};
+
+const derived  = {
+  __proto__: base,
+  // sayHi는 ES6 메서드이므로 [[HomeObject]]를 가짐
+  // sayHi의 [[HomeObject]]는 dervied.prototype을 가리키고
+  // super는 sayHi의 [[HomeObject]]의 프로토타입인 base.prototype을 가리킴
+  sayHi() {
+    return `${super.sayHi()}. How are you doing?`;
+  },
+  // sayHello는 ES6 메서드가 아님
+  // 따라서 [[HomeObject]]를 가자지 않으므로 super 키워드 사용 불가능
+  sayHello: function() {
+    return `${super.sayHi()}. How are you doing?`;
+  }
+};
+
+console.log(derived.sayHi());	// Hi! Lee. How are you doing?
+```
+
+- 메서드를 정의할 때 프로퍼티 값으로 익명 함수 표현식을 할당하는 ES6 이전 방식은 사용하지 않는 것이 좋음
+
+<br>
+
+## 03. 화살표 함수
+
+- `function` 키워드 대신 화살표(=>, fat arrow)를 사용하여 기존의 함수 정의 방식보다 간략하게 함수를 정의 가능
+  - 표현만 간략한 것이 아니라 내부 동작도 기존의 함수보다 간략함
+- 콜백 함수 내부에서 `this`가 전역 객체를 가리키는 문제를 해결하기 위한 대안으로 유용
+
+### 화살표 함수 정의
+
+#### 함수 정의
+
+- 화살표 함수는 함수 선언문으로 정의할 수 없고 함수 표현식으로 정의해야 함
+
+```js
+const multiply = (x, y) => x * y;
+multiply(2, 3);
+```
+
+#### 매개변수 선언
+
+- 매개변수가 여러 개인 경우 소괄호 () 안에 매개변수를 선언
+- 매개변수가 한 개인 경우 소괄호 ()를 생략 가능
+- 매개변수가 없는 경우에는 소괄호 () 생략 불가능
+
+```js
+const arrow1 = (x, y) => { ... };
+const arrow2 = x = { ... };
+```
+
+#### 함수 몸체 정의
+
+- 함수 몸체가 하나의 문으로 구성된다면 함수 몸체를 감싸는 중괄호 {}를 생략할 수 있음
+  - 이때 함수 몸체 내부의 문이 값으로 평가될 수 있는 표현식인 문이라면 암묵적으로 반환됨
+
+```js
+// concise body
+const power = x => x ** 2;
+power(2);	// 4
+
+// 위 표현은 다음과 동일
+// block body
+const power = x => { return x ** 2; }
+```
+
+- 함수 몸체를 감싸는 중괄호를 생략한 경우 함수 몸체 내부의 문이 표현식이 아닌 문이라면 에러가 발생
+  - 표현식이 아닌 문은 반환할 수 없기 때문
+
+```js
+const arrow = () => const x = 1;	// SyntaxError: Unexpected token 'const'
+```
+
+- 객체 리터럴을 반환하는 경우 객체 리터럴을 소괄호 ()로 감싸 주어야 함
+
+```js
+const create = (id, content) => ({ id, content });	
+create(1, 'JavaScript');	// {id: 1, content: "JavaScript"}
+```
+
+- 함수 몸체가 여러 개의 문으로 구성된다면 함수 몸체를 감싸는 중괄호 {}를 생략할 수 없고, 반환값이 있다면 명시해야 함
+
+```js
+const sum = (a, b) => {
+  const result = a + b;
+  return result;
+}
+```
+
+- 화살표 함수도 즉시 실행 함수로 사용할 수 있음
+
+```js
+const person = (name => ({
+  sayHi() { return `Hi? My name is ${name}`; }
+}))('Lee');
+```
+
+- 화살표 함수도 일급 객체이므로 고차 함수에 인수로 전달 가능
+
+```js
+// ES5
+[1, 2, 3].map(function(v) {
+  return v * 2;
+});
+
+// ES6
+[1, 2, 3].map(v => v * 2);
+```
+
+### 화살표 함수와 일반 함수의 차이
+
+- 화살표 함수는 인스턴스를 생성할 수 없는 non-constructor
+  - 화살표 함수는 인스턴스를 생성할 수 없으므로 `prototype` 프로퍼티가 없고 프로토타입도 생성하지 않음
+
+```js
+const Foo = () => {};
+// 화살표 함수는 생성자 함수로서 호출할 수 없음
+new Foo();
+Foo.hasOwnProperty('prototype');	// false
+```
+
+- 중복된 매개변수 이름을 선언할 수 없음
+  - 일반 함수는 중복된 매개변수 이름을 선언해도 에러가 발생하지 않음
+
+```js
+function normal(a, a) { return a + a; }
+console.log(normal(1, 2));	// 4
+
+const arrow = (a, a) => a + a;
+// SyntaxError: Duplicate parameter name not allowed in this context
+```
+
+- 화살표 함수는 함수 자체의 `this`, `arguments`, `super`, `new.target` 바인딩을 갖지 않음
+  - 따라서 함수 내부에서 `this`, `arguments`, `super`, `new.target`을 참조하면 스코프 체인을 통해 상위 스코프를 참조
+  - 화살표 함수와 화살표 함수가 중첩되어 있다면 상위 화살표 함수에도 `this`, `arguments`, `super`, `new.target`바인딩이 없으므로 스코프 체인 상에서 가장 가까운 상위 함수 중에서 화살표 함수가 아닌 함수를 참조
+
+### `this`
+
+- 콜백 함수 내부의 `this`가 외부 함수의 `this`와 다르기 때문에 발생하는 문제를 해결하기 위해 의도적으로 설계 
+- `this` 바인딩은 함수의 호출 방식, 즉 함수가 어떻게 호출되었는지에 따라 동적으로 결정
+  - 함수를 정의할 때 `this`에 바인딩할 객체가 정적으로 결정되는 것이 아니고, 함수를 호출할 때 함수가 어떻게 호출되었는지에 따라 `this`에 바인딩할 객체가 동적으로 결정됨
+
+```js
+class Prefixer {
+  constructor(prefix) {
+    this.prefix = prefix;
+  }
+  
+  add(arr) {
+    // add 메서드는 인수로 전달된 배열 arr를 순회하며 배열의 모든 요소에 prefix를 추가
+    // ①
+    return arr.map(function (item) {
+      return this.prefix + item;	// ②
+      // TypeError: Cannot read property 'prefix' of undefined
+    });
+  }
+}
+
+const prefixer = new Prefixer('-webkit-');
+console.log(prefixer.add(['transition', 'user-select']));
+
+// 위 예제를 실행했을 때 기대하는 결과는 ['-webkit-transition', '-webkit-user-select']
+// ①에서 this는 메서드를 호출한 객체를 가리키지만,
+// Array.prototype.map의 인수로 전달한 콜백 함수 내부인 ②에서 this는 undefined를 가리킴
+// 이는 Array.prototype.map 메서드가 콜백 함수를 일반 함수로서 호출하여
+// 콜백 함수의 this와 외부 함수의 this가 서로 다른 값을 가리키고 있기 때문 
+```
+
+- 일반 함수로서 호출되는 모든 함수 내부의 `this`는 전역 객체를 가리킴
+- 클래스 내부의 모든 코드에는 strict mode가 암묵적으로 적용 => 클래스 내의 콜백 함수에도 strict mode가 적용
+  - strict mode에서 일반 함수로서 호출된 모든 함수 내부의 `this`에는 전역 객체가 아니라 `undefined`가 바인딩
+
+- ES5 이전에는 아래의 방법을 사용
+
+```js
+// 1)
+// this를 회피시킨 후 콜백 함수 내부에서 사용
+add(arr) {
+  const that = this;
+  return arr.map(function (item) {
+    return that.prefix + item;
+  });
+}
+
+// 2)
+// Array.prototype.map의 두 번째 인수로 콜백 함수 내부에서 this로 사용할 객체를 전달
+add(arr) {
+  return arr.map(function (item) {
+    return this.prefix + item;
+  }, this);	// this에 바인딩된 값이 콜백 함수 내부의 this에 바인딩
+}
+
+// 3)
+// Function.prototype.bind 메서드를 사용하여 this를 바인딩
+add(arr) {
+  return arr.map(function (item) {
+    return this.prefix + item;
+  }.bind(this));	// this에 바인딩된 값이 콜백 함수 내부의 this에 바인딩
+}
+```
+
+- ES6에서는 화살표 함수를 사용하여 콜백 함수 내부의 `this` 문제를 해결 가능
+
+```js
+class Prefixer {
+  constructor(prefix) {
+    this.prefix = prefix;
+  }
+  
+  add(arr) {
+    return arr.map(item => this.preifx + item);
+  }
+}
+
+const prefixer = new Prefixer('-webkit-');
+console.log(prefixer.add(['transition', 'user-select']));
+// ['-webkit-transition', '-webkit-user-select']
+```
+
+- 화살표 함수는 함수 자체의 `this` 바인딩을 갖지 않기 때문에 화살표 함수 내부에서 `this`를 참조하면 상위 스코프의 `this`를 그대로 참조함 => lexical this: 렉시컬 스코프와 같이 화살표 함수의 `this`가 함수가 정의된 위치에 의해 결정된다는 것을 의미
+
+- 화살표 함수 내부에서 `this`를 참조하면 일반적인 식별자처럼 스코프 체인을 통해 상위 스코프에서 `this`를 탐색
+- 화살표 함수와 화살표 함수가 중첩되어 있다면 상위 화살표 함수에도 `this` 바인딩이 없으므로 스코프 체인 상에서 가장 가까운 상위 함수 중에서 화살표 함수가 아닌 함수의 `this`를 참조
+
+```js
+// 중첩 함수 foo의 상위 스코프는 즉시 실행 함수
+// 따라서 화살표 함수 foo의 this는 상위 스코프인 즉시 실행 함수의 this를 가리킴
+(function() {
+  const foo = () => console.log(this);
+}).call({a: 1});	// { a: 1 }
+
+// bar 함수는 화살표 함수를 반환하고, 반환된 함수의 상위 스코프는 화살표 함수 bar
+// 그러나 화살표 함수는 함수 자체의 this 바인딩을 갖지 않으므로
+// bar 함수가 반환한 화살표 함수 내부에서 참조하는 this는
+// 화살표 함수가 아닌 즉시 실행 함수의 this를 가리킴
+(function() {
+  const bar = () => () => console.log(this);
+  bar()();
+}).call({a: 1});	// { a: 1 }
+```
+
+- 만약 화살표 함수가 전역 함수라면 화살표 함수는 `this`의 전역 객체를 가리킴
+  - 전역 함수의 상위 스코프는 전역이고 전역에서의 `this`는 전역 객체를 가리키기 때문
+
+- 프로퍼티에 할당한 화살표 함수도 스코프 체인 상에서 가장 가까운 상위 함수 중에서 화살표 함수가 아닌 함수의 `this`를 참조
+
+```js
+// increase 프로퍼티에 할당한 화살표 함수의 상위 스코프는 전역
+// 따라서 해당 함수의 this는 전역을 가리킴
+const counter = {
+  num: 1,
+  increase: () => ++this.num
+};
+
+console.log(counter.increase());	// NaN
+```
+
+- 화살표 함수는 함수 자체의 `this` 바인딩을 갖지 않기 때문에 `Function.prototype.call`, `Function.prototype.apply`, `Function.prototype.bind` 메서드를 사용해도 화살표 함수 내부의 `this`를 교체할 수 없음
+  - 메서드를 호출할 수는 있지만 화살표 함수는 함수 자체의 `this` 바인딩을 갖지 않기 때문에 `this`를 교체할 수 없고 언제나 상위 스코프의 `this` 바인딩을 참조
+
+```js
+window.x = 1;
+
+const normal = function () { return this.x; };
+const arrow = () => this.x;
+
+console.log(normal.call({ x: 10 }));	// 10
+console.log(arrow.call({ x: 10 }));	// 1
+```
+
+- 메서드를 화살표 함수로 정의하는 것은 피해야 함
+  - 메서드를 정의할 때는 ES6 메서드 축약 표현으로 정의한 ES6 메서드를 사용하는 것이 좋음
+
+```js
+// Bad
+const person = {
+  name: 'Lee',
+  sayHi: () => console.log(`Hi, ${this.nama}!`);
+};
+
+// sayHi 프로퍼티에 할당된 화살표 함수 내부의 this는 상위 스코프인 전역의 this가 가리키는 전역 객체를 가리키므로
+// 이 예제를 브라우저에서 실행하면 this.name은 빈 문자열을 갖는 window.name과 같음
+person.sayHi();	// Hi
+
+// Good
+const person = {
+  name: 'Lee',
+  sayHi() {
+    console.log(`Hi, ${this.name}!`);
+  }
+};
+
+person.sayHi();	// Hi, Lee!
+```
+
+- 프로토타입 객체의 프로퍼티에 화살표 함수를 할당하는 경우도 동일한 문제가 발생하므로 일반 함수를 할당
+  - 일반 함수가 아닌 ES6 메서드를 동적 추가하고 싶다면 객체 리터럴을 바인딩하고 프로토타입의 `constructor` 프로퍼티와 생성자 함수 간의 연결을 재설정
+
+```js
+function Person(name) {
+  this.name = name;
+}
+
+Person.prototype = {
+  constructor: Person,
+  sayHi() { console.log(`Hi, ${this.name}!`) };
+};
+
+const person = new Person('Leo');
+person.sayHi();	// Hi, Leo
+```
+
+- 클래스 필드 정의 제안을 사용하여 클래스 필드에 화살표 함수를 할당할 수도 있지만, 해당 함수는 프로토타입 메서드가 아니라 인스턴스 메서드가 되므로 ES6 메서드 축약 표현으로 정의한 ES6 메서드를 사용하는 것이 좋음
+
+### `super`
+
+- 화살표 함수는 함수 자체의 `super` 바인딩을 갖지 않음
+- 화살표 함수 내부에서 `super`를 참조하면 `this`와 마찬가지로 상위 스코프의 `super`를 참조
+
+```js
+class Base {
+  constructor(name) {
+    this.name = name;
+  }
+  
+  sayHi() {
+    return `Hi! ${this.name}`;
+  }
+}
+
+// sayHi 클래스 필드에 할당한 화살표 함수는 ES6 메서드는 아니지만 함수 자체의 super 바인딩을 갖지 않으므로
+// super를 참조해도 에러가 발생하지 않고 상위 스코프인 constructor의 super 바인딩을 참조함
+class Derived extends Base {
+  sayHi = () => `${super.sayHi()} how are you doing?`;
+}
+
+const derived = new Derived('Lee');
+console.log(derived.sayHi());	// Hi! Lee how are you doing?
+```
+
+### `arguments`
+
+- 화살표 함수는 함수 자체의 `arguments` 바인딩을 갖지 않음
+- 화살표 함수 내부에서 `arguments`를 참조하면 `this`와 마찬가지로 상위 스코프의 `arguments`를 참조
+
+```js
+(function () {
+  // 화살표 함수 foo의 arguments는 상위 스코프인 즉시 실행 함수의 arguments를 가리킴
+  const foo = () => console.log(arguments);	// [Arguments] { '0': 1, '1': 2 }
+  foo(3, 4);
+}(1, 2));
+
+// 화살표 함수 foo의 arguments는 상위 스코프인 전역의 arguments를 가리킴
+// 그러나 함수 내부에서만 유효한 arguments 객체는 전역에  없음
+const foo = () => console.log(arguments);
+foo(1, 2);	// ReferenceError: arguments is not defined
+```
+
+- 화살표 함수로 가변 인자 함수를 구현해야 할 때는 반드시 Rest 파라미터를 사용해야 함
+
+<br>
+
+## 04. Rest 파라미터
+
+### 기본 문법
+
+- Rest 파라미터는 매개변수 이름 앞에 세개의 점 `...`을 붙여서 정의한 매개변수로써, 함수에 전달된 인수들의 목록을 배열로 전달받음
+
+```js
+function foo(...rest) {
+  console.log(rest);	// [1, 2, 3, 4, 5]
+}
+
+foo(1, 2, 3, 4, 5);
+```
+
+- 일반 매개변수와 함께 사용할 수 있으며, 이때 함수에 전달된 인수들은 매개변수와 Rest 파라미터에 순차적으로 할당
+
+```js
+function foo(param, ...rest) {
+  console.log(param);	// 1
+  console.log(rest);	// [2, 3, 4, 5]
+}
+foo(1, 2, 3, 4, 5);
+
+function bar(param1, param2, ...rest) {
+  console.log(param1);	// 1
+  console.log(param2);	// 2
+  console.log(rest);	// [3, 4, 5]
+}
+bar(1, 2, 3, 4, 5);
+```
+
+- 먼저 선언된 매개변수에 할당된 인수를 제외한 나머지 인수들로 구성된 배열이 할당되므로 Rest 파라미터는 반드시 마지막 파라미터이어야 함
+
+```js
+function foo(...rest, param) { }
+foo(1, 2, 3, 4, 5);
+// SyntaxError: Rest parameter must be last formal parameter
+```
+
+- Rest 파라미터는 단 하나만 선언할 수 있음
+- 함수 정의 시 선언한 매개변수 개수를 나타내는 함수 객체의 length 프로퍼티에 영향을 주지 않음
+
+```js
+function foo(...rest) {}
+console.log(foo.length);	// 0
+
+function bar(x, ...rest) {}
+console.log(bar.length);	// 1
+
+function baz(x, y, ...rest) {}
+console.log(baz.length);	// 2
+```
+
+### Rest 파라미터와 `arguments` 객체
+
+- `arguments` 객체는 함수 호출 시 전달된 인수들의 정보를 담고 있는 순회 가능한 유사 배열 객체이며, 함수 내부에서 지역 변수처럼 사용 가능
+- 유사 배열 객체이므로 배열 메서드를 사용하려면 `Function.prototype.call`이나 `Function.prototype.apply` 메서드를 사용해 `arguments` 객체를 배열로 변환해야 함
+
+```js
+function sum() {
+  var array = Array.prototype.slice.call(arguments);
+  
+  return array.reduce(function (pre, cur) {
+    return pre + cur;
+  }, 0);
+}
+
+console.log(sum(1, 2, 3, 4, 5));	// 15
+```
+
+- ES6에서는 Rest 파라미터를 사용하여 가변 인자 함수의 인수 목록을 배열로 직접 전달받을 수 있음
+
+```js
+function sum(...args) {
+  // Rest 파라미터 args에는 배열 [1, 2, 3, 4, 5]가 할당
+  return args.reduce((pre, cur) => pre + cur, 0);
+}
+
+console.log(sum(1, 2, 3, 4, 5));	// 15
+```
+
+- 함수와 ES6 메서드는 Rest 파라미터와 `arguments` 객체를 모두 사용할 수 있음
+- 화살표 함수는 함수 자체의 `arguments` 객체를 가지지 않으므로 화살표 함수로 가변 인자 함수를 구현해야 할 때는 반드시 Rest 파라미터를 사용해야 함
+
+<br>
+
+## 05. 매개변수 기본값
+
+- 인수가 전달되지 않은 매개변수의 값은 `undefined`
+  - 방어 코드로 인수가 전달되지 않은 경우 매개변수에 기본값을 할당할 필요가 있음
+
+```js
+function sum1(x, y) {
+  return x + y;
+}
+
+console.log(sum1(1));	// NaN
+
+function sum2(x + y) {
+  x = x || 0;
+  y = y || 0;
+  
+  return x + y;
+}
+
+console.log(sum2(1));	// 1
+```
+
+- ES6에서 도입된 매개변수 기본값을 사용하면 함수 내에서 수행하던 인수 체크 및 초기화를 간소화할 수 있음
+
+```js
+function sum(x = 0, y = 0) {
+  return x + y;
+}
+
+console.log(sum(1));	// 1
+console.log(sum(1, 2));	// 3
+```
+
+- 매개변수 기본값은 매개변수에 인수를 전달하지 않은 경우와 `undefined`를 전달한 경우에만 유효
+
+```js
+function logName(name = 'Lee') {
+  console.log(name);
+}
+
+logName();	// Lee
+logName(undefined);	// Lee
+logName(null);	// null
+```
+
+- Rest 파라미터에는 기본값을 지정할 수 없음
+- 매개변수 기본값은 함수 정의 시 선언한 매개변수 개수를 나타내는 함수 객체의 `length` 프로퍼티와 `arguments` 객체에 아무런 영향을 주지 않음
